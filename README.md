@@ -2,7 +2,7 @@
 Domus FeedはデスクトップPC向けのRSSフィードリーダーアプリです。
 クラウドサービスを利用せず、アプリケーションデータはユーザーのローカル環境に保存されます。
 
-Domus Feed is a desktop RSS reader application. All application data is stored on locally, and no cloud services are used.
+Domus Feed is a desktop RSS reader application. All application data is stored locally, and no cloud services are used.
 
 ![Home画面](images/home.png "Home画面")
 
