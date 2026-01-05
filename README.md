@@ -43,7 +43,7 @@ RSS検索画面にてフィードのURLを検索するとフィードのプレ�
 - ブックマークしている記事は取得日に関わらず表示されます
 
 ## Download
-最新のインストーラーは[GitHub Releases](xxxx)ページからダウンロードできます。
+最新のインストーラーは[GitHub Releases](https://github.com/kitataku/domus-feed-releases/releases)ページからダウンロードできます。
 
 
 ## セキュリティについて
