@@ -11,19 +11,12 @@ Domus Feed is a desktop RSS reader application.
 ### はじめに
 - バックエンドはローカル環境のみで動作します
 - クラウドサービスは利用していません
-- ユーザーのデータはローカルに保存されます
-- 外部へのデータ送信はおこないません
+- ユーザーのアプリケーションデータはローカルに保存されます
+
 
 ## セキュリティに関する注意
 
-### Virus Total
-https://www.virustotal.com/gui/file/f7ccf7445043d5de1413e018531a3e034780ab7b89697eb5e03ee08818786cf8/detection
-
-https://www.virustotal.com/gui/file/16b05b73255d7580ac6fa392f54f00dfc6f48b6edf93581ceda75a3babb21e39/detection
-
-https://www.virustotal.com/gui/file/ba3daa147b51dcdf6a60e94a3fe411732ac6220669d4c4b93046bfcf4bcb2290/detection
-
-### Cargo Audit
+[こちら](security/report.md)
 
 
 ## ライセンス
