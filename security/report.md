@@ -4,23 +4,38 @@
 セキュリティに関する問題を発見した場合は、[GitHub Issues](https://github.com/kitataku/domus-feed-releases/issues)にご連絡ください。
 
 ## Virus Total
-配布している実行ファイルについて[VirusTotal](https://www.virustotal.com/gui/home/upload)によるスキャンを実施しています。
-
-一部のアンチウイルスエンジンにより機械学習解析に基づく警告が報告されていますが、これらはPyinstallerによるonefile実行形式および未署名の実行ファイルに起因する誤検知と考えられます。
+配布している実行ファイルについて[VirusTotal](https://www.virustotal.com/gui/home/)によるスキャンを実施しています。
 
 ### スキャン結果
 |ファイル名|スキャン結果|
 |---|---|
-|domusfeed.exe|[スキャン結果](https://www.virustotal.com/gui/file/b7af915636b14d8b0056c9dca87a897490184a49fa7098a74c9a771c2b15e5cb/detection)|
-|launch_server.exe (Sidecar)|[スキャン結果](https://www.virustotal.com/gui/file/16b05b73255d7580ac6fa392f54f00dfc6f48b6edf93581ceda75a3babb21e39/detection)|
-|migrate.exe (Sidecar)|[スキャン結果](https://www.virustotal.com/gui/file/ba3daa147b51dcdf6a60e94a3fe411732ac6220669d4c4b93046bfcf4bcb2290/detection)|
+|domusfeed.exe|[スキャン結果](https://www.virustotal.com/gui/file/9ef6961abe37958fa4b1f3eba2160e3f04c86f54aca0d501fe53b1a57d6548bd/detection)|
+
+### スキャン結果の解釈
+スキャン結果のうち、Trapmine が `Malicious.high.ml.score` を報告しています。これは機械学習モデルによるヒューリスティック検出であり、同様に機械学習解析を行う Acronis (Static ML) が Undetected を示していることからも、誤検知と判断しています。本アプリケーションは v2.0 よりバックエンドを Rust (Tauri) に刷新しており、従来の Python + PyInstaller 構成に由来する誤検知は解消されました。現在報告されている検出は、未署名の実行ファイルに対する機械学習エンジン固有の誤反応と考えられます。
 
 ## Cargo Audit
-Rust依存関係については`cargo audit`を用いた確認を実施しています。
-確認時点で発生している警告はTauriが内部で使用している依存関係によるものであり、現状のアプリケーション独自のコードに起因する脆弱性は確認されておりません。
+確認時点で発生している警告・脆弱性はいずれもTauriまたはsqlxが内部で使用している依存関係によるものです。特にrsa 0.9.10（RUSTSEC-2023-0071）はsqlxのMySQL用ドライバ経由で混入していますが、本アプリはSQLiteのみを使用しているためRSA演算は実行されません。現状のアプリケーション独自のコードに起因する脆弱性は確認されておりません。
 
 ### 実行結果
 ```
+Crate:     rsa
+Version:   0.9.10
+Title:     Marvin Attack: potential key recovery through timing sidechannels
+Date:      2023-11-22
+ID:        RUSTSEC-2023-0071
+URL:       https://rustsec.org/advisories/RUSTSEC-2023-0071
+Severity:  5.9 (medium)
+Solution:  No fixed upgrade is available!
+Dependency tree:
+rsa 0.9.10
+└── sqlx-mysql 0.8.6
+    ├── sqlx-macros-core 0.8.6
+    │   └── sqlx-macros 0.8.6
+    │       └── sqlx 0.8.6
+    │           └── domusfeed 2.0.0
+    └── sqlx 0.8.6
+
 Crate:     atk
 Version:   0.18.2
 Warning:   unmaintained
@@ -34,15 +49,9 @@ atk 0.18.2
     ├── wry 0.53.5
     │   └── tauri-runtime-wry 2.9.3
     │       └── tauri 2.9.5
-    │           ├── tauri-plugin-shell 2.3.3
-    │           │   └── domusfeed 0.9.2
     │           ├── tauri-plugin-opener 2.5.2
-    │           │   └── domusfeed 0.9.2
-    │           ├── tauri-plugin-http 2.5.4
-    │           │   └── domusfeed 0.9.2
-    │           ├── tauri-plugin-fs 2.4.4
-    │           │   └── tauri-plugin-http 2.5.4
-    │           └── domusfeed 0.9.2
+    │           │   └── domusfeed 2.0.0
+    │           └── domusfeed 2.0.0
     ├── webkit2gtk 2.0.1
     │   ├── wry 0.53.5
     │   ├── tauri-runtime-wry 2.9.3
@@ -76,15 +85,9 @@ atk-sys 0.18.2
 │   │   ├── wry 0.53.5
 │   │   │   └── tauri-runtime-wry 2.9.3
 │   │   │       └── tauri 2.9.5
-│   │   │           ├── tauri-plugin-shell 2.3.3
-│   │   │           │   └── domusfeed 0.9.2
 │   │   │           ├── tauri-plugin-opener 2.5.2
-│   │   │           │   └── domusfeed 0.9.2
-│   │   │           ├── tauri-plugin-http 2.5.4
-│   │   │           │   └── domusfeed 0.9.2
-│   │   │           ├── tauri-plugin-fs 2.4.4
-│   │   │           │   └── tauri-plugin-http 2.5.4
-│   │   │           └── domusfeed 0.9.2
+│   │   │           │   └── domusfeed 2.0.0
+│   │   │           └── domusfeed 2.0.0
 │   │   └── webkit2gtk 2.0.1
 │   │       ├── wry 0.53.5
 │   │       ├── tauri-runtime-wry 2.9.3
@@ -127,33 +130,23 @@ fxhash 0.2.1
         ├── wry 0.53.5
         │   └── tauri-runtime-wry 2.9.3
         │       └── tauri 2.9.5
-        │           ├── tauri-plugin-shell 2.3.3
-        │           │   └── domusfeed 0.9.2
         │           ├── tauri-plugin-opener 2.5.2
-        │           │   └── domusfeed 0.9.2
-        │           ├── tauri-plugin-http 2.5.4
-        │           │   └── domusfeed 0.9.2
-        │           ├── tauri-plugin-fs 2.4.4
-        │           │   └── tauri-plugin-http 2.5.4
-        │           └── domusfeed 0.9.2
+        │           │   └── domusfeed 2.0.0
+        │           └── domusfeed 2.0.0
         └── tauri-utils 2.8.1
             ├── tauri-runtime-wry 2.9.3
             ├── tauri-runtime 2.9.2
             │   ├── tauri-runtime-wry 2.9.3
             │   └── tauri 2.9.5
-            ├── tauri-plugin-fs 2.4.4
             ├── tauri-plugin 2.5.2
-            │   ├── tauri-plugin-shell 2.3.3
-            │   ├── tauri-plugin-opener 2.5.2
-            │   ├── tauri-plugin-http 2.5.4
-            │   └── tauri-plugin-fs 2.4.4
+            │   └── tauri-plugin-opener 2.5.2
             ├── tauri-macros 2.5.2
             │   └── tauri 2.9.5
             ├── tauri-codegen 2.5.2
             │   └── tauri-macros 2.5.2
             ├── tauri-build 2.5.3
             │   ├── tauri 2.9.5
-            │   └── domusfeed 0.9.2
+            │   └── domusfeed 2.0.0
             └── tauri 2.9.5
 
 Crate:     gdk
@@ -169,15 +162,9 @@ gdk 0.18.2
 │   ├── wry 0.53.5
 │   │   └── tauri-runtime-wry 2.9.3
 │   │       └── tauri 2.9.5
-│   │           ├── tauri-plugin-shell 2.3.3
-│   │           │   └── domusfeed 0.9.2
 │   │           ├── tauri-plugin-opener 2.5.2
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-http 2.5.4
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-fs 2.4.4
-│   │           │   └── tauri-plugin-http 2.5.4
-│   │           └── domusfeed 0.9.2
+│   │           │   └── domusfeed 2.0.0
+│   │           └── domusfeed 2.0.0
 │   ├── tauri-runtime-wry 2.9.3
 │   ├── tauri-runtime 2.9.2
 │   │   ├── tauri-runtime-wry 2.9.3
@@ -213,15 +200,9 @@ gdk-sys 0.18.2
 │   ├── wry 0.53.5
 │   │   └── tauri-runtime-wry 2.9.3
 │   │       └── tauri 2.9.5
-│   │           ├── tauri-plugin-shell 2.3.3
-│   │           │   └── domusfeed 0.9.2
 │   │           ├── tauri-plugin-opener 2.5.2
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-http 2.5.4
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-fs 2.4.4
-│   │           │   └── tauri-plugin-http 2.5.4
-│   │           └── domusfeed 0.9.2
+│   │           │   └── domusfeed 2.0.0
+│   │           └── domusfeed 2.0.0
 │   └── webkit2gtk 2.0.1
 │       ├── wry 0.53.5
 │       ├── tauri-runtime-wry 2.9.3
@@ -273,15 +254,9 @@ gdkwayland-sys 0.18.2
 └── tao 0.34.5
     └── tauri-runtime-wry 2.9.3
         └── tauri 2.9.5
-            ├── tauri-plugin-shell 2.3.3
-            │   └── domusfeed 0.9.2
             ├── tauri-plugin-opener 2.5.2
-            │   └── domusfeed 0.9.2
-            ├── tauri-plugin-http 2.5.4
-            │   └── domusfeed 0.9.2
-            ├── tauri-plugin-fs 2.4.4
-            │   └── tauri-plugin-http 2.5.4
-            └── domusfeed 0.9.2
+            │   └── domusfeed 2.0.0
+            └── domusfeed 2.0.0
 
 Crate:     gdkx11
 Version:   0.18.2
@@ -295,15 +270,9 @@ gdkx11 0.18.2
 └── wry 0.53.5
     └── tauri-runtime-wry 2.9.3
         └── tauri 2.9.5
-            ├── tauri-plugin-shell 2.3.3
-            │   └── domusfeed 0.9.2
             ├── tauri-plugin-opener 2.5.2
-            │   └── domusfeed 0.9.2
-            ├── tauri-plugin-http 2.5.4
-            │   └── domusfeed 0.9.2
-            ├── tauri-plugin-fs 2.4.4
-            │   └── tauri-plugin-http 2.5.4
-            └── domusfeed 0.9.2
+            │   └── domusfeed 2.0.0
+            └── domusfeed 2.0.0
 
 Crate:     gdkx11-sys
 Version:   0.18.2
@@ -317,15 +286,9 @@ gdkx11-sys 0.18.2
 ├── tao 0.34.5
 │   └── tauri-runtime-wry 2.9.3
 │       └── tauri 2.9.5
-│           ├── tauri-plugin-shell 2.3.3
-│           │   └── domusfeed 0.9.2
 │           ├── tauri-plugin-opener 2.5.2
-│           │   └── domusfeed 0.9.2
-│           ├── tauri-plugin-http 2.5.4
-│           │   └── domusfeed 0.9.2
-│           ├── tauri-plugin-fs 2.4.4
-│           │   └── tauri-plugin-http 2.5.4
-│           └── domusfeed 0.9.2
+│           │   └── domusfeed 2.0.0
+│           └── domusfeed 2.0.0
 └── gdkx11 0.18.2
     └── wry 0.53.5
         └── tauri-runtime-wry 2.9.3
@@ -342,15 +305,9 @@ gtk 0.18.2
 ├── wry 0.53.5
 │   └── tauri-runtime-wry 2.9.3
 │       └── tauri 2.9.5
-│           ├── tauri-plugin-shell 2.3.3
-│           │   └── domusfeed 0.9.2
 │           ├── tauri-plugin-opener 2.5.2
-│           │   └── domusfeed 0.9.2
-│           ├── tauri-plugin-http 2.5.4
-│           │   └── domusfeed 0.9.2
-│           ├── tauri-plugin-fs 2.4.4
-│           │   └── tauri-plugin-http 2.5.4
-│           └── domusfeed 0.9.2
+│           │   └── domusfeed 2.0.0
+│           └── domusfeed 2.0.0
 ├── webkit2gtk 2.0.1
 │   ├── wry 0.53.5
 │   ├── tauri-runtime-wry 2.9.3
@@ -383,15 +340,9 @@ gtk-sys 0.18.2
 │   ├── wry 0.53.5
 │   │   └── tauri-runtime-wry 2.9.3
 │   │       └── tauri 2.9.5
-│   │           ├── tauri-plugin-shell 2.3.3
-│   │           │   └── domusfeed 0.9.2
 │   │           ├── tauri-plugin-opener 2.5.2
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-http 2.5.4
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-fs 2.4.4
-│   │           │   └── tauri-plugin-http 2.5.4
-│   │           └── domusfeed 0.9.2
+│   │           │   └── domusfeed 2.0.0
+│   │           └── domusfeed 2.0.0
 │   └── webkit2gtk 2.0.1
 │       ├── wry 0.53.5
 │       ├── tauri-runtime-wry 2.9.3
@@ -431,15 +382,9 @@ gtk3-macros 0.18.2
     ├── wry 0.53.5
     │   └── tauri-runtime-wry 2.9.3
     │       └── tauri 2.9.5
-    │           ├── tauri-plugin-shell 2.3.3
-    │           │   └── domusfeed 0.9.2
     │           ├── tauri-plugin-opener 2.5.2
-    │           │   └── domusfeed 0.9.2
-    │           ├── tauri-plugin-http 2.5.4
-    │           │   └── domusfeed 0.9.2
-    │           ├── tauri-plugin-fs 2.4.4
-    │           │   └── tauri-plugin-http 2.5.4
-    │           └── domusfeed 0.9.2
+    │           │   └── domusfeed 2.0.0
+    │           └── domusfeed 2.0.0
     ├── webkit2gtk 2.0.1
     │   ├── wry 0.53.5
     │   ├── tauri-runtime-wry 2.9.3
@@ -473,15 +418,9 @@ proc-macro-error 1.0.4
 │       ├── wry 0.53.5
 │       │   └── tauri-runtime-wry 2.9.3
 │       │       └── tauri 2.9.5
-│       │           ├── tauri-plugin-shell 2.3.3
-│       │           │   └── domusfeed 0.9.2
 │       │           ├── tauri-plugin-opener 2.5.2
-│       │           │   └── domusfeed 0.9.2
-│       │           ├── tauri-plugin-http 2.5.4
-│       │           │   └── domusfeed 0.9.2
-│       │           ├── tauri-plugin-fs 2.4.4
-│       │           │   └── tauri-plugin-http 2.5.4
-│       │           └── domusfeed 0.9.2
+│       │           │   └── domusfeed 2.0.0
+│       │           └── domusfeed 2.0.0
 │       ├── webkit2gtk 2.0.1
 │       │   ├── wry 0.53.5
 │       │   ├── tauri-runtime-wry 2.9.3
@@ -549,36 +488,25 @@ Dependency tree:
 unic-char-property 0.9.0
 └── unic-ucd-ident 0.9.0
     └── urlpattern 0.3.0
-        ├── tauri-utils 2.8.1
-        │   ├── tauri-runtime-wry 2.9.3
-        │   │   └── tauri 2.9.5
-        │   │       ├── tauri-plugin-shell 2.3.3
-        │   │       │   └── domusfeed 0.9.2
-        │   │       ├── tauri-plugin-opener 2.5.2
-        │   │       │   └── domusfeed 0.9.2
-        │   │       ├── tauri-plugin-http 2.5.4
-        │   │       │   └── domusfeed 0.9.2
-        │   │       ├── tauri-plugin-fs 2.4.4
-        │   │       │   └── tauri-plugin-http 2.5.4
-        │   │       └── domusfeed 0.9.2
-        │   ├── tauri-runtime 2.9.2
-        │   │   ├── tauri-runtime-wry 2.9.3
-        │   │   └── tauri 2.9.5
-        │   ├── tauri-plugin-fs 2.4.4
-        │   ├── tauri-plugin 2.5.2
-        │   │   ├── tauri-plugin-shell 2.3.3
-        │   │   ├── tauri-plugin-opener 2.5.2
-        │   │   ├── tauri-plugin-http 2.5.4
-        │   │   └── tauri-plugin-fs 2.4.4
-        │   ├── tauri-macros 2.5.2
-        │   │   └── tauri 2.9.5
-        │   ├── tauri-codegen 2.5.2
-        │   │   └── tauri-macros 2.5.2
-        │   ├── tauri-build 2.5.3
-        │   │   ├── tauri 2.9.5
-        │   │   └── domusfeed 0.9.2
-        │   └── tauri 2.9.5
-        └── tauri-plugin-http 2.5.4
+        └── tauri-utils 2.8.1
+            ├── tauri-runtime-wry 2.9.3
+            │   └── tauri 2.9.5
+            │       ├── tauri-plugin-opener 2.5.2
+            │       │   └── domusfeed 2.0.0
+            │       └── domusfeed 2.0.0
+            ├── tauri-runtime 2.9.2
+            │   ├── tauri-runtime-wry 2.9.3
+            │   └── tauri 2.9.5
+            ├── tauri-plugin 2.5.2
+            │   └── tauri-plugin-opener 2.5.2
+            ├── tauri-macros 2.5.2
+            │   └── tauri 2.9.5
+            ├── tauri-codegen 2.5.2
+            │   └── tauri-macros 2.5.2
+            ├── tauri-build 2.5.3
+            │   ├── tauri 2.9.5
+            │   └── domusfeed 2.0.0
+            └── tauri 2.9.5
 
 Crate:     unic-char-range
 Version:   0.9.0
@@ -591,36 +519,25 @@ Dependency tree:
 unic-char-range 0.9.0
 ├── unic-ucd-ident 0.9.0
 │   └── urlpattern 0.3.0
-│       ├── tauri-utils 2.8.1
-│       │   ├── tauri-runtime-wry 2.9.3
-│       │   │   └── tauri 2.9.5
-│       │   │       ├── tauri-plugin-shell 2.3.3
-│       │   │       │   └── domusfeed 0.9.2
-│       │   │       ├── tauri-plugin-opener 2.5.2
-│       │   │       │   └── domusfeed 0.9.2
-│       │   │       ├── tauri-plugin-http 2.5.4
-│       │   │       │   └── domusfeed 0.9.2
-│       │   │       ├── tauri-plugin-fs 2.4.4
-│       │   │       │   └── tauri-plugin-http 2.5.4
-│       │   │       └── domusfeed 0.9.2
-│       │   ├── tauri-runtime 2.9.2
-│       │   │   ├── tauri-runtime-wry 2.9.3
-│       │   │   └── tauri 2.9.5
-│       │   ├── tauri-plugin-fs 2.4.4
-│       │   ├── tauri-plugin 2.5.2
-│       │   │   ├── tauri-plugin-shell 2.3.3
-│       │   │   ├── tauri-plugin-opener 2.5.2
-│       │   │   ├── tauri-plugin-http 2.5.4
-│       │   │   └── tauri-plugin-fs 2.4.4
-│       │   ├── tauri-macros 2.5.2
-│       │   │   └── tauri 2.9.5
-│       │   ├── tauri-codegen 2.5.2
-│       │   │   └── tauri-macros 2.5.2
-│       │   ├── tauri-build 2.5.3
-│       │   │   ├── tauri 2.9.5
-│       │   │   └── domusfeed 0.9.2
-│       │   └── tauri 2.9.5
-│       └── tauri-plugin-http 2.5.4
+│       └── tauri-utils 2.8.1
+│           ├── tauri-runtime-wry 2.9.3
+│           │   └── tauri 2.9.5
+│           │       ├── tauri-plugin-opener 2.5.2
+│           │       │   └── domusfeed 2.0.0
+│           │       └── domusfeed 2.0.0
+│           ├── tauri-runtime 2.9.2
+│           │   ├── tauri-runtime-wry 2.9.3
+│           │   └── tauri 2.9.5
+│           ├── tauri-plugin 2.5.2
+│           │   └── tauri-plugin-opener 2.5.2
+│           ├── tauri-macros 2.5.2
+│           │   └── tauri 2.9.5
+│           ├── tauri-codegen 2.5.2
+│           │   └── tauri-macros 2.5.2
+│           ├── tauri-build 2.5.3
+│           │   ├── tauri 2.9.5
+│           │   └── domusfeed 2.0.0
+│           └── tauri 2.9.5
 └── unic-char-property 0.9.0
     └── unic-ucd-ident 0.9.0
 
@@ -636,36 +553,25 @@ unic-common 0.9.0
 └── unic-ucd-version 0.9.0
     └── unic-ucd-ident 0.9.0
         └── urlpattern 0.3.0
-            ├── tauri-utils 2.8.1
-            │   ├── tauri-runtime-wry 2.9.3
-            │   │   └── tauri 2.9.5
-            │   │       ├── tauri-plugin-shell 2.3.3
-            │   │       │   └── domusfeed 0.9.2
-            │   │       ├── tauri-plugin-opener 2.5.2
-            │   │       │   └── domusfeed 0.9.2
-            │   │       ├── tauri-plugin-http 2.5.4
-            │   │       │   └── domusfeed 0.9.2
-            │   │       ├── tauri-plugin-fs 2.4.4
-            │   │       │   └── tauri-plugin-http 2.5.4
-            │   │       └── domusfeed 0.9.2
-            │   ├── tauri-runtime 2.9.2
-            │   │   ├── tauri-runtime-wry 2.9.3
-            │   │   └── tauri 2.9.5
-            │   ├── tauri-plugin-fs 2.4.4
-            │   ├── tauri-plugin 2.5.2
-            │   │   ├── tauri-plugin-shell 2.3.3
-            │   │   ├── tauri-plugin-opener 2.5.2
-            │   │   ├── tauri-plugin-http 2.5.4
-            │   │   └── tauri-plugin-fs 2.4.4
-            │   ├── tauri-macros 2.5.2
-            │   │   └── tauri 2.9.5
-            │   ├── tauri-codegen 2.5.2
-            │   │   └── tauri-macros 2.5.2
-            │   ├── tauri-build 2.5.3
-            │   │   ├── tauri 2.9.5
-            │   │   └── domusfeed 0.9.2
-            │   └── tauri 2.9.5
-            └── tauri-plugin-http 2.5.4
+            └── tauri-utils 2.8.1
+                ├── tauri-runtime-wry 2.9.3
+                │   └── tauri 2.9.5
+                │       ├── tauri-plugin-opener 2.5.2
+                │       │   └── domusfeed 2.0.0
+                │       └── domusfeed 2.0.0
+                ├── tauri-runtime 2.9.2
+                │   ├── tauri-runtime-wry 2.9.3
+                │   └── tauri 2.9.5
+                ├── tauri-plugin 2.5.2
+                │   └── tauri-plugin-opener 2.5.2
+                ├── tauri-macros 2.5.2
+                │   └── tauri 2.9.5
+                ├── tauri-codegen 2.5.2
+                │   └── tauri-macros 2.5.2
+                ├── tauri-build 2.5.3
+                │   ├── tauri 2.9.5
+                │   └── domusfeed 2.0.0
+                └── tauri 2.9.5
 
 Crate:     unic-ucd-ident
 Version:   0.9.0
@@ -677,36 +583,25 @@ URL:       https://rustsec.org/advisories/RUSTSEC-2025-0100
 Dependency tree:
 unic-ucd-ident 0.9.0
 └── urlpattern 0.3.0
-    ├── tauri-utils 2.8.1
-    │   ├── tauri-runtime-wry 2.9.3
-    │   │   └── tauri 2.9.5
-    │   │       ├── tauri-plugin-shell 2.3.3
-    │   │       │   └── domusfeed 0.9.2
-    │   │       ├── tauri-plugin-opener 2.5.2
-    │   │       │   └── domusfeed 0.9.2
-    │   │       ├── tauri-plugin-http 2.5.4
-    │   │       │   └── domusfeed 0.9.2
-    │   │       ├── tauri-plugin-fs 2.4.4
-    │   │       │   └── tauri-plugin-http 2.5.4
-    │   │       └── domusfeed 0.9.2
-    │   ├── tauri-runtime 2.9.2
-    │   │   ├── tauri-runtime-wry 2.9.3
-    │   │   └── tauri 2.9.5
-    │   ├── tauri-plugin-fs 2.4.4
-    │   ├── tauri-plugin 2.5.2
-    │   │   ├── tauri-plugin-shell 2.3.3
-    │   │   ├── tauri-plugin-opener 2.5.2
-    │   │   ├── tauri-plugin-http 2.5.4
-    │   │   └── tauri-plugin-fs 2.4.4
-    │   ├── tauri-macros 2.5.2
-    │   │   └── tauri 2.9.5
-    │   ├── tauri-codegen 2.5.2
-    │   │   └── tauri-macros 2.5.2
-    │   ├── tauri-build 2.5.3
-    │   │   ├── tauri 2.9.5
-    │   │   └── domusfeed 0.9.2
-    │   └── tauri 2.9.5
-    └── tauri-plugin-http 2.5.4
+    └── tauri-utils 2.8.1
+        ├── tauri-runtime-wry 2.9.3
+        │   └── tauri 2.9.5
+        │       ├── tauri-plugin-opener 2.5.2
+        │       │   └── domusfeed 2.0.0
+        │       └── domusfeed 2.0.0
+        ├── tauri-runtime 2.9.2
+        │   ├── tauri-runtime-wry 2.9.3
+        │   └── tauri 2.9.5
+        ├── tauri-plugin 2.5.2
+        │   └── tauri-plugin-opener 2.5.2
+        ├── tauri-macros 2.5.2
+        │   └── tauri 2.9.5
+        ├── tauri-codegen 2.5.2
+        │   └── tauri-macros 2.5.2
+        ├── tauri-build 2.5.3
+        │   ├── tauri 2.9.5
+        │   └── domusfeed 2.0.0
+        └── tauri 2.9.5
 
 Crate:     unic-ucd-version
 Version:   0.9.0
@@ -719,36 +614,25 @@ Dependency tree:
 unic-ucd-version 0.9.0
 └── unic-ucd-ident 0.9.0
     └── urlpattern 0.3.0
-        ├── tauri-utils 2.8.1
-        │   ├── tauri-runtime-wry 2.9.3
-        │   │   └── tauri 2.9.5
-        │   │       ├── tauri-plugin-shell 2.3.3
-        │   │       │   └── domusfeed 0.9.2
-        │   │       ├── tauri-plugin-opener 2.5.2
-        │   │       │   └── domusfeed 0.9.2
-        │   │       ├── tauri-plugin-http 2.5.4
-        │   │       │   └── domusfeed 0.9.2
-        │   │       ├── tauri-plugin-fs 2.4.4
-        │   │       │   └── tauri-plugin-http 2.5.4
-        │   │       └── domusfeed 0.9.2
-        │   ├── tauri-runtime 2.9.2
-        │   │   ├── tauri-runtime-wry 2.9.3
-        │   │   └── tauri 2.9.5
-        │   ├── tauri-plugin-fs 2.4.4
-        │   ├── tauri-plugin 2.5.2
-        │   │   ├── tauri-plugin-shell 2.3.3
-        │   │   ├── tauri-plugin-opener 2.5.2
-        │   │   ├── tauri-plugin-http 2.5.4
-        │   │   └── tauri-plugin-fs 2.4.4
-        │   ├── tauri-macros 2.5.2
-        │   │   └── tauri 2.9.5
-        │   ├── tauri-codegen 2.5.2
-        │   │   └── tauri-macros 2.5.2
-        │   ├── tauri-build 2.5.3
-        │   │   ├── tauri 2.9.5
-        │   │   └── domusfeed 0.9.2
-        │   └── tauri 2.9.5
-        └── tauri-plugin-http 2.5.4
+        └── tauri-utils 2.8.1
+            ├── tauri-runtime-wry 2.9.3
+            │   └── tauri 2.9.5
+            │       ├── tauri-plugin-opener 2.5.2
+            │       │   └── domusfeed 2.0.0
+            │       └── domusfeed 2.0.0
+            ├── tauri-runtime 2.9.2
+            │   ├── tauri-runtime-wry 2.9.3
+            │   └── tauri 2.9.5
+            ├── tauri-plugin 2.5.2
+            │   └── tauri-plugin-opener 2.5.2
+            ├── tauri-macros 2.5.2
+            │   └── tauri 2.9.5
+            ├── tauri-codegen 2.5.2
+            │   └── tauri-macros 2.5.2
+            ├── tauri-build 2.5.3
+            │   ├── tauri 2.9.5
+            │   └── domusfeed 2.0.0
+            └── tauri 2.9.5
 
 Crate:     glib
 Version:   0.18.5
@@ -763,15 +647,9 @@ glib 0.18.5
 │   ├── wry 0.53.5
 │   │   └── tauri-runtime-wry 2.9.3
 │   │       └── tauri 2.9.5
-│   │           ├── tauri-plugin-shell 2.3.3
-│   │           │   └── domusfeed 0.9.2
 │   │           ├── tauri-plugin-opener 2.5.2
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-http 2.5.4
-│   │           │   └── domusfeed 0.9.2
-│   │           ├── tauri-plugin-fs 2.4.4
-│   │           │   └── tauri-plugin-http 2.5.4
-│   │           └── domusfeed 0.9.2
+│   │           │   └── domusfeed 2.0.0
+│   │           └── domusfeed 2.0.0
 │   ├── tauri-runtime-wry 2.9.3
 │   ├── tauri-runtime 2.9.2
 │   │   ├── tauri-runtime-wry 2.9.3
@@ -825,5 +703,118 @@ glib 0.18.5
 └── atk 0.18.2
     └── gtk 0.18.2
 
-warning: 18 allowed warnings found
+Crate:     rand
+Version:   0.7.3
+Warning:   unsound
+Title:     Rand is unsound with a custom logger using `rand::rng()`
+Date:      2026-04-09
+ID:        RUSTSEC-2026-0097
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0097
+Dependency tree:
+rand 0.7.3
+└── phf_generator 0.8.0
+    └── phf_codegen 0.8.0
+        └── selectors 0.24.0
+            └── kuchikiki 0.8.8-speedreader
+                ├── wry 0.53.5
+                │   └── tauri-runtime-wry 2.9.3
+                │       └── tauri 2.9.5
+                │           ├── tauri-plugin-opener 2.5.2
+                │           │   └── domusfeed 2.0.0
+                │           └── domusfeed 2.0.0
+                └── tauri-utils 2.8.1
+                    ├── tauri-runtime-wry 2.9.3
+                    ├── tauri-runtime 2.9.2
+                    │   ├── tauri-runtime-wry 2.9.3
+                    │   └── tauri 2.9.5
+                    ├── tauri-plugin 2.5.2
+                    │   └── tauri-plugin-opener 2.5.2
+                    ├── tauri-macros 2.5.2
+                    │   └── tauri 2.9.5
+                    ├── tauri-codegen 2.5.2
+                    │   └── tauri-macros 2.5.2
+                    ├── tauri-build 2.5.3
+                    │   ├── tauri 2.9.5
+                    │   └── domusfeed 2.0.0
+                    └── tauri 2.9.5
+
+Crate:     rand
+Version:   0.8.5
+Warning:   unsound
+Title:     Rand is unsound with a custom logger using `rand::rng()`
+Date:      2026-04-09
+ID:        RUSTSEC-2026-0097
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0097
+Dependency tree:
+rand 0.8.5
+├── sqlx-postgres 0.8.6
+│   ├── sqlx-macros-core 0.8.6
+│   │   └── sqlx-macros 0.8.6
+│   │       └── sqlx 0.8.6
+│   │           └── domusfeed 2.0.0
+│   └── sqlx 0.8.6
+├── sqlx-mysql 0.8.6
+│   ├── sqlx-macros-core 0.8.6
+│   └── sqlx 0.8.6
+├── phf_generator 0.11.3
+│   ├── string_cache_codegen 0.5.4
+│   │   └── markup5ever 0.14.1
+│   │       └── html5ever 0.29.1
+│   │           ├── wry 0.53.5
+│   │           │   └── tauri-runtime-wry 2.9.3
+│   │           │       └── tauri 2.9.5
+│   │           │           ├── tauri-plugin-opener 2.5.2
+│   │           │           │   └── domusfeed 2.0.0
+│   │           │           └── domusfeed 2.0.0
+│   │           ├── tauri-utils 2.8.1
+│   │           │   ├── tauri-runtime-wry 2.9.3
+│   │           │   ├── tauri-runtime 2.9.2
+│   │           │   │   ├── tauri-runtime-wry 2.9.3
+│   │           │   │   └── tauri 2.9.5
+│   │           │   ├── tauri-plugin 2.5.2
+│   │           │   │   └── tauri-plugin-opener 2.5.2
+│   │           │   ├── tauri-macros 2.5.2
+│   │           │   │   └── tauri 2.9.5
+│   │           │   ├── tauri-codegen 2.5.2
+│   │           │   │   └── tauri-macros 2.5.2
+│   │           │   ├── tauri-build 2.5.3
+│   │           │   │   ├── tauri 2.9.5
+│   │           │   │   └── domusfeed 2.0.0
+│   │           │   └── tauri 2.9.5
+│   │           └── kuchikiki 0.8.8-speedreader
+│   │               ├── wry 0.53.5
+│   │               └── tauri-utils 2.8.1
+│   ├── phf_macros 0.11.3
+│   │   └── phf 0.11.3
+│   │       ├── tauri-utils 2.8.1
+│   │       └── markup5ever 0.14.1
+│   └── phf_codegen 0.11.3
+│       └── markup5ever 0.14.1
+├── phf_generator 0.10.0
+│   └── phf_macros 0.10.0
+│       └── phf 0.10.1
+│           └── cssparser 0.29.6
+│               ├── selectors 0.24.0
+│               │   └── kuchikiki 0.8.8-speedreader
+│               └── kuchikiki 0.8.8-speedreader
+└── num-bigint-dig 0.8.6
+    └── rsa 0.9.10
+        └── sqlx-mysql 0.8.6
+
+Crate:     rand
+Version:   0.9.2
+Warning:   unsound
+Title:     Rand is unsound with a custom logger using `rand::rng()`
+Date:      2026-04-09
+ID:        RUSTSEC-2026-0097
+URL:       https://rustsec.org/advisories/RUSTSEC-2026-0097
+Dependency tree:
+rand 0.9.2
+└── quinn-proto 0.11.14
+    └── quinn 0.11.9
+        └── reqwest 0.13.3
+            └── domusfeed 2.0.0
+
+error: 1 vulnerability found!
+warning: 21 allowed warnings found
 ```
