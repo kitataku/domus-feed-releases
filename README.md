@@ -71,8 +71,8 @@ All rights reserved.
 ## サポート
 インストールや実行時の問題については本リポジトリの[GitHub Issues](https://github.com/kitataku/domus-feed-releases/issues)よりご連絡ください。
 
-
 ## 寄付
 もしこのアプリが気に入ったら、開発を応援してもらえると嬉しいです！
 
 <a href="https://www.buymeacoffee.com/kitataku" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me a Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
