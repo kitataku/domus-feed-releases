@@ -44,9 +44,10 @@ RSS検索画面にてフィードのURLを検索するとフィードのプレ�
 また、フォルダごとに登録されたフィードを確認することもできます。
 
 ## 仕様
-- 登録したRSSフィードから過去14日分の記事を取得します
+- 登録したRSSフィードから過去30日分の記事を取得します
 - ブックマークしていない記事は、取得後7日まで表示されます
 - ブックマークしている記事は取得日に関わらず表示されます
+- ブックマークしていない記事は取得してから14日以上経過するとデータベースから自動で削除されます
 
 ## Download
 最新のインストーラーは[GitHub Releases](https://github.com/kitataku/domus-feed-releases/releases)ページからダウンロードできます。
@@ -54,7 +55,7 @@ RSS検索画面にてフィードのURLを検索するとフィードのプレ�
 
 ## セキュリティについて
 ### 通信について
-本アプリケーションはローカルホスト（`127.0.0.1`）上でのみ動作します。  
+本アプリケーションはローカル上でのみ動作します。  
 ユーザーが登録したRSSフィードを取得する際に限り、対象WebサイトへのHTTPリクエストを送信しますが、それ以外の用途でユーザーの情報を外部へ送信することはありません。
 
 ### セキュリティレポート
@@ -70,3 +71,8 @@ All rights reserved.
 ## サポート
 インストールや実行時の問題については本リポジトリの[GitHub Issues](https://github.com/kitataku/domus-feed-releases/issues)よりご連絡ください。
 
+
+## 寄付
+もしこのアプリが気に入ったら、開発を応援してもらえると嬉しいです！
+
+<a href="https://www.buymeacoffee.com/kitataku" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-red.png" alt="Buy Me a Coffee" style="height: 60px !important;width: 217px !important;" ></a>
